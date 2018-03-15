@@ -1,0 +1,368 @@
+
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['bar']});
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.load('current', {'packages': ['geochart'],
+    'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'});
+   //google.charts.setOnLoadCallback(drawVisualisationmap);
+ 
+function drawVisualisationmap() {
+  var query="http://localhost:3030/sample/query?output=json&query=%0APREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+voc2%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1150%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0A%0ASELECT+distinct%0A(SUM(xsd%3Adecimal(%3Fpop))+AS+%3Fpopulation)+(SUM(xsd%3Adecimal(%3FnoICU))+AS+%3FICU)%0A(SUM(xsd%3Adecimal(%3FnoEB))+AS+%3FEmergencyBeds)%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1152%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1210%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1152%0A++%7B%0A%3Fs+voc2%3Aveteran_population+%3Fpop.+%0A%3Fs+voc2%3Astate+%3Fstate.%0A++%7D%0A++GRAPH+g%3Adata1210%0A++%7B%0A%3Fs1+voc1%3Aintensive_care_unit_class+%3FnoICU.%0A%3Fs1+voc1%3Aemergency_room_beds+%3FnoEB.%0A%3Fs1+voc1%3Astate+%3Fstate.%0A++%7D%0A%7Dgroup+by+%3Fstate+order+by+%3Fstate";  
+
+  $.ajax({
+    type: "GET",
+    url: query,
+    dataType: "json",
+    error: function (xhr, textStatus, error) {
+        alert("Error: " + error)
+      },
+    success: successVisualizationmap
+  });
+} 
+
+function successVisualizationmap(result) { 
+  var arr=[];
+  arr[0]='State';
+  arr[1]='Veteran Population';
+  arr[2]='ICU and EB';
+  var data=[];
+  data.push(arr);
+  var i=0;
+  for(var key in result){
+    for(var v in result[key]){
+      if(i==0){
+        i++;
+      }else{
+        for(var obj in result[key][v]){
+        var arr=[];
+        arr[0]=abbrState(result[key][v][obj].state.value,'name');
+        arr[1]=parseInt(result[key][v][obj].population.value);
+        arr[2]=parseInt(result[key][v][obj].ICU.value)+parseInt(result[key][v][obj].EmergencyBeds.value);
+        data.push(arr);
+        }
+      }
+    }
+  }
+  var data1 = google.visualization.arrayToDataTable(data);
+  var options = {};
+  options['region'] = 'US';	// show US map
+  options['dataMode'] = 'regions';
+  options['resolution'] = 'provinces';
+  options['colorAxis']= {colors: ['FF0000']};
+  options['width'] = 900;
+  options['height'] = 550;
+  var chart = new google.visualization.GeoChart(document.getElementById('table_div'));
+  chart.draw(data1,options);
+}
+
+function abbrState(input, to){
+    
+    var states = [
+        ['Arizona', 'AZ'],
+        ['Alabama', 'AL'],
+        ['Alaska', 'AK'],
+        ['Arizona', 'AZ'],
+        ['Arkansas', 'AR'],
+        ['California', 'CA'],
+        ['Colorado', 'CO'],
+        ['Connecticut', 'CT'],
+        ['Delaware', 'DE'],
+		['District of Columbia', 'DC'],
+        ['Florida', 'FL'],
+        ['Georgia', 'GA'],
+        ['Hawaii', 'HI'],
+        ['Idaho', 'ID'],
+        ['Illinois', 'IL'],
+        ['Indiana', 'IN'],
+        ['Iowa', 'IA'],
+        ['Kansas', 'KS'],
+        ['Kentucky', 'KY'],
+        ['Kentucky', 'KY'],
+        ['Louisiana', 'LA'],
+        ['Maine', 'ME'],
+        ['Maryland', 'MD'],
+        ['Massachusetts', 'MA'],
+        ['Michigan', 'MI'],
+        ['Minnesota', 'MN'],
+        ['Mississippi', 'MS'],
+        ['Missouri', 'MO'],
+        ['Montana', 'MT'],
+        ['Nebraska', 'NE'],
+        ['Nevada', 'NV'],
+        ['New Hampshire', 'NH'],
+        ['New Jersey', 'NJ'],
+        ['New Mexico', 'NM'],
+        ['New York', 'NY'],
+        ['North Carolina', 'NC'],
+        ['North Dakota', 'ND'],
+        ['Ohio', 'OH'],
+        ['Oklahoma', 'OK'],
+        ['Oregon', 'OR'],
+        ['Pennsylvania', 'PA'],
+        ['Rhode Island', 'RI'],
+        ['South Carolina', 'SC'],
+        ['South Dakota', 'SD'],
+        ['Tennessee', 'TN'],
+        ['Texas', 'TX'],
+		['Puerto Rico','PR'],
+        ['Utah', 'UT'],
+        ['Vermont', 'VT'],
+        ['Virginia', 'VA'],
+        ['Washington', 'WA'],
+        ['West Virginia', 'WV'],
+        ['Wisconsin', 'WI'],
+        ['Wyoming', 'WY'],
+    ];
+        if (to == 'name'){
+          input = input.toUpperCase();
+          for(i = 0; i < states.length; i++){
+            if(states[i][1] == input){
+              return(states[i][0]);
+            }
+        }    
+    }
+}
+
+function drawVisualisationmap1() {
+  var query="http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(SUM(xsd%3Adecimal(%3Finp))+AS+%3Finpatient)+(SUM(xsd%3Adecimal(%3Foutp))+AS+%3Foutpatient)%0A(SUM(xsd%3Adecimal(%3Fphy))+AS+%3Fphysician)+(SUM(xsd%3Adecimal(%3Fnur))+AS+%3Fnursing)+%0A(SUM(xsd%3Adecimal(%3Fprof))+AS+%3Fprofessionals)+%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1205%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1212%3E%0AWHERE+%7B%0A+GRAPH+g%3Adata1212%7B+%0A%3Fs+voc%3Ainpatient+%3Finp.%0A%3Fs+voc%3Aoutpatient+%3Foutp.%0A+%3Fs+voc%3Astate+%3Fstate.%7D%0A+GRAPH+g%3Adata1205%7B+++%0A%3Fs1+voc%3Astaffing_physicians+%3Fphy.%0A%3Fs1+voc%3Astaffing_nursing+%3Fnur.%0A%3Fs1+voc%3Astaffing_other_health_professionals+%3Fprof.+%0A%3Fs1+voc%3Astate+%3Fstate.%0A+%7D%0A%7D+group+by+%3Fstate+order+by+%3Fstate";
+
+  $.ajax({
+    type: "GET",
+    url: query,
+    dataType: "json",
+    error: function (xhr, textStatus, error) {
+        alert("Error: " + error)
+    },
+    success: successVisualizationmap1
+  });
+} 
+
+function successVisualizationmap1(result) { 
+  var arr=[];
+  arr[0]='State';
+  arr[1]='Veteran Patients';
+  arr[2]='Hospital Staff';
+  var data=[];
+  data.push(arr);
+  var i=0;
+  for(var key in result){
+    for(var v in result[key]){
+      if(i==0){
+      i++;
+      }else{
+      for(var obj in result[key][v]){
+        var arr=[];
+        arr[0]=abbrState(result[key][v][obj].state.value,'name');
+        var x1= ( result[key][v][obj].inpatient ? result[key][v][obj].inpatient.value : 0 );
+        var x2= ( result[key][v][obj].outpatient ? result[key][v][obj].outpatient.value : 0 );
+        var x3= ( result[key][v][obj].physician ? result[key][v][obj].physician.value : 0 );
+        var x4= ( result[key][v][obj].nursing ? result[key][v][obj].nursing.value : 0 );
+        var x5= ( result[key][v][obj].professionals ? result[key][v][obj].professionals.value : 0 );
+        arr[1]=parseInt(x1)+parseInt(x2);
+        arr[2]=parseInt(x3)+parseInt(x4)+parseInt(x5);
+        data.push(arr);
+        }
+      }
+    }
+  }
+  var data1 = google.visualization.arrayToDataTable(data);
+  var options = {};
+  options['region'] = 'US';	// show US map
+  options['dataMode'] = 'regions';
+  options['resolution'] = 'provinces';
+  options['colorAxis']= {colors: ['FF0000']};
+  options['width'] = 900;
+  options['height'] = 550;
+  var chart = new google.visualization.GeoChart(document.getElementById('table_div'));
+  chart.draw(data1,options);
+}
+	
+function drawVisualisationmap2() {
+  var query="http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(sum(xsd%3Adecimal(%3Finp))+AS+%3Finpatient)+(sum(xsd%3Adecimal(%3FnoICU))+AS+%3FICU)%0A(sum(xsd%3Adecimal(%3FnoEB))+AS+%3FEmergencyBeds)%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1210%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1212%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1212%0A+%7B%0A%3Fs+voc%3Ainpatient+%3Finp.+%0A%3Fs+voc%3Astate+%3Fstate.%0A++%7D%0A++GRAPH+g%3Adata1210%0A++%7B%0A%3Fs1+voc%3Aintensive_care_unit_class+%3FnoICU.%0A%3Fs1+voc%3Aemergency_room_beds+%3FnoEB.%0A%3Fs1+voc%3Astate+%3Fstate.%0A++%7D%0A%7D+group+by+%3Fstate++order+by+%3Fstate";  
+
+  $.ajax({
+    type: "GET",
+    url: query,
+    dataType: "json",
+    error: function (xhr, textStatus, error) {
+        alert("Error: " + error)
+      },
+    success: successVisualizationmap2
+  });
+} 	
+
+function successVisualizationmap2(result) { 
+  var arr=[];
+  arr[0]='State';
+  arr[1]='Veteran InPatients';
+  arr[2]='Emergency Health Care';
+  var data=[];
+  data.push(arr);
+  var i=0;
+  for(var key in result){
+    for(var v in result[key]){
+      if(i==0){
+      i++;
+      }else{
+      for(var obj in result[key][v]){
+          var arr=[];
+          arr[0]=abbrState(result[key][v][obj].state.value,'name');
+          var x1= ( result[key][v][obj].inpatient ? result[key][v][obj].inpatient.value : 0 );
+          arr[1]=parseInt(x1);
+          arr[2]=parseInt(result[key][v][obj].ICU.value)+parseInt(result[key][v][obj].EmergencyBeds.value);
+          data.push(arr);
+        }
+      }
+    }
+  }
+  var data1 = google.visualization.arrayToDataTable(data);
+  var options = {};
+  options['region'] = 'US';	// show US map
+  options['dataMode'] = 'regions';
+  options['resolution'] = 'provinces';
+  options['colorAxis']= {colors: ['FF0000']};
+  options['width'] = 900;
+  options['height'] = 550;
+  var chart = new google.visualization.GeoChart(document.getElementById('table_div'));
+  chart.draw(data1,options);
+}
+
+function drawVisualisationmap3() {
+   var query="http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1538%2F%3E%0APREFIX+voc2%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1537%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+%0A(SUM(COALESCE(xsd%3Adecimal(%3Fcomp_yr1)%2C0))+AS+%3Fcompensation_2008)+%0A(SUM(COALESCE(xsd%3Adecimal(%3Fcomp_yr2)%2C0))+AS+%3Fcompensation_2007)+%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1538%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1537%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1538%0A%7B%0A%3Fs+voc1%3Atotal_c_p+%3Fcomp_yr1.+%0A%3Fs+voc1%3Astate+%3Fstate.%0A%7D%0AGRAPH+g%3Adata1537%0A%7B%0A%3Fs1+voc2%3Atotal_c_p+%3Fcomp_yr2.%0A%3Fs1+voc2%3Astate+%3Fstate+%0A%7D%0A%7D++group+by+%3Fstate+order+by+%3Fstate";   
+   
+  $.ajax({
+    type: "GET",
+    url: query,
+    dataType: "json",
+    error: function (xhr, textStatus, error) {
+        alert("Error: " + error)
+      },
+    success: successVisualizationmap3
+  });
+} 
+
+function successVisualizationmap3(result) { 
+  var arr=[];
+  arr[0]='State';
+  arr[1]='2008 Compensation';
+  arr[2]='2007 Compensation';
+  var data=[];
+  data.push(arr);
+  var i=0;
+  for(var key in result){
+    for(var v in result[key]){
+      if(i==0){
+      i++;
+      }else{
+      for(var obj in result[key][v]){
+          var arr=[];
+          arr[0]=result[key][v][obj].state.value;
+          arr[1]=parseInt(result[key][v][obj].compensation_2008.value);
+          arr[2]=parseInt(result[key][v][obj].compensation_2007.value);
+          data.push(arr);
+        }
+      }
+    }
+  }
+  var data1 = google.visualization.arrayToDataTable(data);
+  var options = {
+    chart: {
+      title: 'Veteran Compensation Comparison for Years 2008/07',
+  		height:'700'
+    }
+  };
+  var chart = new google.charts.Bar(document.getElementById('table_div'));
+  chart.draw(data1, google.charts.Bar.convertOptions(options));
+}
+
+function drawVisualisationmap4() {
+   var query="http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1538%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_60_90)%2C0))+AS+%3Fcompensation_60_90)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_30_50)%2C0))+AS+%3Fcompensation_30_50)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_100)%2C0))+AS+%3Fcompensation_100)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_30)%2C0))+AS+%3Fcompensation_30)+%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1538%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1538%0A%7B%0A%3Fs+voc1%3Acompensation_60_90+%3Fc_60_90.+%0A%3Fs+voc1%3Acompensation_30_50+%3Fc_30_50.%0A%3Fs+voc1%3Acompensation_100+%3Fc_100.%0A%3Fs+voc1%3Acompensation_30+%3Fc_30.%0A%7D+%0A%7D"; 
+  $.ajax({
+    type: "GET",
+    url: query,
+    dataType: "json",
+    error: function (xhr, textStatus, error) {
+        alert("Error: " + error)
+      },
+    success: successVisualizationmap4
+  });
+} 	
+
+function successVisualizationmap4(result) { 
+
+  var pieData = new google.visualization.DataTable();
+  pieData.addColumn('string','AgeGroups');
+  pieData.addColumn('number','Compensation');
+  titlearr=['compensation_30','compensation_30_50','compensation_60_90','compensation_100'];
+  var i=0;
+  for(var key in result){
+    for(var v in result[key]){
+      if(i==0){
+      i++;
+      }else{
+      for(var obj in result[key][v]){
+        var arr=[];
+        arr[0]=parseInt(result[key][v][obj].compensation_30.value);
+        arr[1]=parseInt(result[key][v][obj].compensation_30_50.value);
+        arr[2]=parseInt(result[key][v][obj].compensation_60_90.value)
+        arr[3]=parseInt(result[key][v][obj].compensation_100.value);
+        }
+      }
+    }
+  }
+
+  pieData.addRows([[titlearr[0],arr[0]],
+                [titlearr[1],arr[1]],
+  				      [titlearr[2],arr[2]],
+  				      [titlearr[3],arr[3]]]);
+
+  var options={'title':'Veteran Compensation distribution according to various age groups',
+              'height':700,
+              'width':700};
+
+  var chart = new google.visualization.PieChart(document.getElementById('table_div'));
+  chart.draw(pieData,options);
+}
+
+</script>
+</head>
+<body style="background-color:#FFFFFF">
+<div class="container-fluid">
+  <div class="row">
+    <div class="navbar navbar-inverse">
+      <h1 style="color:white;text-align:center"> VETERAN HEALTH AFFAIRS AND COMPENSATION</h1>
+      <h4 style="color:white;text-align:center"> By: Pushpita Panigrahi, Pranathi Peri, Srilalitha</h4>
+      <h4 style="color:white;text-align:center"> WEBSCRAPERS</h4>
+    </div>
+  </div>
+</div>
+<div class="container" >
+<div class="row">
+<div class="panel panel-default">
+<div class="panel-heading" style="background-color:black; font-family:Georgia;font-size:30px;text-align:center;">Visualisations</div>
+<div class="panel-body" style="color:black;">
+<li class="glyphicon glyphicon-tags" onClick="drawVisualisationmap()"><a href="#" style="font-size:18px;color:black;font-family:Georgia;text-shadow: 2px lightgrey;">&nbsp;&nbsp;&nbsp;Veteran Population vs No of ICU and Emergency Beds</a></li><br><br>
+<li class="glyphicon glyphicon-tags" onClick="drawVisualisationmap1()"><a href="#" style="font-size:18px;color:black;font-family:Georgia;text-shadow: 2px lightgrey;">&nbsp;&nbsp;&nbsp;Veteran Patients vs Hospital Staff</a></li><br><br>
+<li class="glyphicon glyphicon-tags" onClick="drawVisualisationmap2()"><a href="#" style="font-size:18px;color:black;font-family:Georgia;text-shadow: 2px lightgrey;">&nbsp;&nbsp;&nbsp;Veteran InPatients vs Emergency Health Care</a></li><br><br>
+<li class="glyphicon glyphicon-tags" onClick="drawVisualisationmap3()"><a href="#" style="font-size:18px;color:black;font-family:Georgia;text-shadow: 2px lightgrey;">&nbsp;&nbsp;&nbsp;Veteran Compensation Comparison  for Year 2008/07</a></li><br><br>
+<li class="glyphicon glyphicon-tags" onClick="drawVisualisationmap4()"><a href="#" style="font-size:18px;color:black;font-family:Georgia;text-shadow: 2px lightgrey;">&nbsp;&nbsp;&nbsp;Veteran Compensation for Each Age Group</a></li><br><br>
+</div>
+</div>
+</div>
+<div id="table_div"></div>
+<p><br><br><br><br></p>
+<!-- Demo Description -->
+</center>
+</div>
+</body>
+</html>

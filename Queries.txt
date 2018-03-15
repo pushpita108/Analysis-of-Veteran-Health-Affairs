@@ -1,0 +1,178 @@
+a) Comparison of veteran population with number of ICU and emergency beds in given time frame 
+
+
+Load data-1152.nt with destination graph name data1152 ,data-1210.nt with destination graph name data1210 into sample dataset
+--------------------------------------------------------------------------------------------------------------------------------
+
+SPARQL Query:
+-------------
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX voc1:<http://data-gov.tw.rpi.edu/vocab/p/1202/>
+PREFIX voc2:<http://data-gov.tw.rpi.edu/vocab/p/1150/>
+PREFIX g:<http://localhost:3030/sample/data/>
+
+SELECT distinct
+(SUM(xsd:decimal(?pop)) AS ?population) (SUM(xsd:decimal(?noICU)) AS ?ICU)
+(SUM(xsd:decimal(?noEB)) AS ?EmergencyBeds)
+?state
+FROM NAMED  <http://localhost:3030/sample/data/data1152>
+FROM NAMED  <http://localhost:3030/sample/data/data1210>
+WHERE {
+GRAPH g:data1152
+  {
+?s voc2:veteran_population ?pop. 
+?s voc2:state ?state.
+  }
+  GRAPH g:data1210
+  {
+?s1 voc1:intensive_care_unit_class ?noICU.
+?s1 voc1:emergency_room_beds ?noEB.
+?s1 voc1:state ?state.
+  }
+}group by ?state order by ?state
+
+URL or Link for the above query:
+----------------------------------
+ 
+http://localhost:3030/sample/query?output=json&query=%0APREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+voc2%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1150%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0A%0ASELECT+distinct%0A(SUM(xsd%3Adecimal(%3Fpop))+AS+%3Fpopulation)+(SUM(xsd%3Adecimal(%3FnoICU))+AS+%3FICU)%0A(SUM(xsd%3Adecimal(%3FnoEB))+AS+%3FEmergencyBeds)%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1152%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1210%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1152%0A++%7B%0A%3Fs+voc2%3Aveteran_population+%3Fpop.+%0A%3Fs+voc2%3Astate+%3Fstate.%0A++%7D%0A++GRAPH+g%3Adata1210%0A++%7B%0A%3Fs1+voc1%3Aintensive_care_unit_class+%3FnoICU.%0A%3Fs1+voc1%3Aemergency_room_beds+%3FnoEB.%0A%3Fs1+voc1%3Astate+%3Fstate.%0A++%7D%0A%7Dgroup+by+%3Fstate+order+by+%3Fstate
+
+
+b) Comparison of number of veteran patients and hospital staff for each state 
+
+
+Load data-1205.nt with destination graph name data1205 ,data-1212.nt with destination graph name data1212 into sample dataset
+-------------------------------------------------------------------------------------------------------------------------------
+
+SPARQL Query:
+-------------
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX voc:<http://data-gov.tw.rpi.edu/vocab/p/1202/>
+PREFIX g:<http://localhost:3030/sample/data/>
+SELECT distinct
+(SUM(xsd:decimal(?inp)) AS ?inpatient) (SUM(xsd:decimal(?outp)) AS ?outpatient)
+(SUM(xsd:decimal(?phy)) AS ?physician) (SUM(xsd:decimal(?nur)) AS ?nursing) 
+(SUM(xsd:decimal(?prof)) AS ?professionals) ?state
+FROM NAMED  <http://localhost:3030/sample/data/data1205>
+FROM NAMED  <http://localhost:3030/sample/data/data1212>
+WHERE {
+ GRAPH g:data1212{ 
+?s voc:inpatient ?inp.
+?s voc:outpatient ?outp.
+ ?s voc:state ?state.}
+ GRAPH g:data1205{   
+?s1 voc:staffing_physicians ?phy.
+?s1 voc:staffing_nursing ?nur.
+?s1 voc:staffing_other_health_professionals ?prof. 
+?s1 voc:state ?state.
+ }
+} group by ?state order by ?state
+
+URL or Link to the above Query:
+--------------------------------
+
+http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(SUM(xsd%3Adecimal(%3Finp))+AS+%3Finpatient)+(SUM(xsd%3Adecimal(%3Foutp))+AS+%3Foutpatient)%0A(SUM(xsd%3Adecimal(%3Fphy))+AS+%3Fphysician)+(SUM(xsd%3Adecimal(%3Fnur))+AS+%3Fnursing)+%0A(SUM(xsd%3Adecimal(%3Fprof))+AS+%3Fprofessionals)+%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1205%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1212%3E%0AWHERE+%7B%0A+GRAPH+g%3Adata1212%7B+%0A%3Fs+voc%3Ainpatient+%3Finp.%0A%3Fs+voc%3Aoutpatient+%3Foutp.%0A+%3Fs+voc%3Astate+%3Fstate.%7D%0A+GRAPH+g%3Adata1205%7B+++%0A%3Fs1+voc%3Astaffing_physicians+%3Fphy.%0A%3Fs1+voc%3Astaffing_nursing+%3Fnur.%0A%3Fs1+voc%3Astaffing_other_health_professionals+%3Fprof.+%0A%3Fs1+voc%3Astate+%3Fstate.%0A+%7D%0A%7D+group+by+%3Fstate+order+by+%3Fstate
+
+
+c) State-wise comparison of number of veteran inpatients to number of emergency health care facility 
+
+Load data-1210.nt with destination graph name data1210 ,data-1212.nt with destination graph name data1212 into sample dataset 
+-------------------------------------------------------------------------------------------------------------------------------
+SPARQL Query:
+-------------
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX voc:<http://data-gov.tw.rpi.edu/vocab/p/1202/>
+PREFIX g:<http://localhost:3030/sample/data/>
+SELECT distinct
+(sum(xsd:decimal(?inp)) AS ?inpatient) (sum(xsd:decimal(?noICU)) AS ?ICU)
+(sum(xsd:decimal(?noEB)) AS ?EmergencyBeds)
+?state
+FROM NAMED  <http://localhost:3030/sample/data/data1210>
+FROM NAMED  <http://localhost:3030/sample/data/data1212>
+WHERE {
+GRAPH g:data1212
+ {
+?s voc:inpatient ?inp. 
+?s voc:state ?state.
+  }
+  GRAPH g:data1210
+  {
+?s1 voc:intensive_care_unit_class ?noICU.
+?s1 voc:emergency_room_beds ?noEB.
+?s1 voc:state ?state.
+  }
+} group by ?state  order by ?state
+
+URL or Link to the above query:
+---------------------------------
+
+http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1202%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(sum(xsd%3Adecimal(%3Finp))+AS+%3Finpatient)+(sum(xsd%3Adecimal(%3FnoICU))+AS+%3FICU)%0A(sum(xsd%3Adecimal(%3FnoEB))+AS+%3FEmergencyBeds)%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1210%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1212%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1212%0A+%7B%0A%3Fs+voc%3Ainpatient+%3Finp.+%0A%3Fs+voc%3Astate+%3Fstate.%0A++%7D%0A++GRAPH+g%3Adata1210%0A++%7B%0A%3Fs1+voc%3Aintensive_care_unit_class+%3FnoICU.%0A%3Fs1+voc%3Aemergency_room_beds+%3FnoEB.%0A%3Fs1+voc%3Astate+%3Fstate.%0A++%7D%0A%7D+group+by+%3Fstate++order+by+%3Fstate
+
+d) State-wise comparison of total pension and compensation for veterans in years 2007 and 2008
+
+Load data-1538.nt with destination graph name data1538 ,data-1537.nt with destination graph name data1537 into sample dataset
+------------------------------------------------------------------------------------------------------------------------------
+SPARQL Query:
+------------
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX voc1:<http://data-gov.tw.rpi.edu/vocab/p/1538/>
+PREFIX voc2:<http://data-gov.tw.rpi.edu/vocab/p/1537/>
+PREFIX g:<http://localhost:3030/sample/data/>
+SELECT 
+(SUM(COALESCE(xsd:decimal(?comp_yr1),0)) AS ?compensation_2008) 
+(SUM(COALESCE(xsd:decimal(?comp_yr2),0)) AS ?compensation_2007) 
+?state
+FROM NAMED  <http://localhost:3030/sample/data/data1538>
+FROM NAMED  <http://localhost:3030/sample/data/data1537>
+WHERE {
+GRAPH g:data1538
+{
+?s voc1:total_c_p ?comp_yr1. 
+?s voc1:state ?state.
+}
+GRAPH g:data1537
+{
+?s1 voc2:total_c_p ?comp_yr2.
+?s1 voc2:state ?state 
+}
+}  group by ?state order by ?state
+
+Link or URL to the above query:
+-------------------------------
+
+http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1538%2F%3E%0APREFIX+voc2%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1537%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+%0A(SUM(COALESCE(xsd%3Adecimal(%3Fcomp_yr1)%2C0))+AS+%3Fcompensation_2008)+%0A(SUM(COALESCE(xsd%3Adecimal(%3Fcomp_yr2)%2C0))+AS+%3Fcompensation_2007)+%0A%3Fstate%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1538%3E%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1537%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1538%0A%7B%0A%3Fs+voc1%3Atotal_c_p+%3Fcomp_yr1.+%0A%3Fs+voc1%3Astate+%3Fstate.%0A%7D%0AGRAPH+g%3Adata1537%0A%7B%0A%3Fs1+voc2%3Atotal_c_p+%3Fcomp_yr2.%0A%3Fs1+voc2%3Astate+%3Fstate+%0A%7D%0A%7D++group+by+%3Fstate+order+by+%3Fstate
+
+
+e)Comparison of compensation of veterans for each age group irrespective of state
+
+Load data-1538.nt with destination graph name data1538 into sample dataset
+----------------------------------------------------------------------------
+
+SPARQL Query:
+-------------
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX voc1:<http://data-gov.tw.rpi.edu/vocab/p/1538/>
+PREFIX g:<http://localhost:3030/sample/data/>
+SELECT distinct
+(SUM(COALESCE(xsd:decimal(?c_60_90),0)) AS ?compensation_60_90)
+(SUM(COALESCE(xsd:decimal(?c_30_50),0)) AS ?compensation_30_50)
+(SUM(COALESCE(xsd:decimal(?c_100),0)) AS ?compensation_100)
+(SUM(COALESCE(xsd:decimal(?c_30),0)) AS ?compensation_30) 
+FROM NAMED  <http://localhost:3030/sample/data/data1538>
+WHERE {
+GRAPH g:data1538
+{
+?s voc1:compensation_60_90 ?c_60_90. 
+?s voc1:compensation_30_50 ?c_30_50.
+?s voc1:compensation_100 ?c_100.
+?s voc1:compensation_30 ?c_30.
+} 
+}
+
+Link or URL to the above query:
+-------------------------------
+
+http://localhost:3030/sample/query?output=json&query=PREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0APREFIX+voc1%3A%3Chttp%3A%2F%2Fdata-gov.tw.rpi.edu%2Fvocab%2Fp%2F1538%2F%3E%0APREFIX+g%3A%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2F%3E%0ASELECT+distinct%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_60_90)%2C0))+AS+%3Fcompensation_60_90)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_30_50)%2C0))+AS+%3Fcompensation_30_50)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_100)%2C0))+AS+%3Fcompensation_100)%0A(SUM(COALESCE(xsd%3Adecimal(%3Fc_30)%2C0))+AS+%3Fcompensation_30)+%0AFROM+NAMED++%3Chttp%3A%2F%2Flocalhost%3A3030%2Fsample%2Fdata%2Fdata1538%3E%0AWHERE+%7B%0AGRAPH+g%3Adata1538%0A%7B%0A%3Fs+voc1%3Acompensation_60_90+%3Fc_60_90.+%0A%3Fs+voc1%3Acompensation_30_50+%3Fc_30_50.%0A%3Fs+voc1%3Acompensation_100+%3Fc_100.%0A%3Fs+voc1%3Acompensation_30+%3Fc_30.%0A%7D+%0A%7D
